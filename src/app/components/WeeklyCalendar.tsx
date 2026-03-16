@@ -28,12 +28,37 @@ export function WeeklyCalendar() {
 
   const [weekData, setWeekData] = useState<WeekData>(() => {
     const stored = localStorage.getItem("study-planner-data");
-    return stored ? JSON.parse(stored) : {};
+    if (!stored) return {};
+    
+    try {
+      const parsed = JSON.parse(stored);
+      // 기존 데이터가 category 필드가 없는 경우 마이그레이션
+      const migrated: WeekData = {};
+      Object.entries(parsed).forEach(([dateKey, tasks]) => {
+        migrated[dateKey] = (tasks as Task[]).map((task) => {
+          if (!task.category) {
+            return { ...task, category: "논술" as Category };
+          }
+          return task;
+        });
+      });
+      return migrated;
+    } catch (e) {
+      console.error("Failed to parse stored data:", e);
+      return {};
+    }
   });
 
   const [weeklyGoals, setWeeklyGoals] = useState<WeeklyGoals>(() => {
     const stored = localStorage.getItem("study-planner-goals");
-    return stored ? JSON.parse(stored) : {};
+    if (!stored) return {};
+    
+    try {
+      return JSON.parse(stored);
+    } catch (e) {
+      console.error("Failed to parse stored goals:", e);
+      return {};
+    }
   });
 
   const [showHistory, setShowHistory] = useState(false);
@@ -195,31 +220,31 @@ export function WeeklyCalendar() {
   };
 
   return (
-    <div className="w-full h-full bg-gray-50 p-6 overflow-y-auto">
+    <div className="w-full h-full bg-gray-50 p-4 md:p-6 overflow-y-auto">
       <div className="max-w-[1600px] mx-auto">
         {/* 헤더 */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-3xl font-bold text-gray-800">
+        <div className="mb-4 md:mb-6">
+          <div className="flex items-center justify-between mb-4 gap-3">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
               주간 공부 계획
             </h1>
             <button
               onClick={() => setShowHistory(true)}
-              className="px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-2"
+              className="px-3 py-2 md:px-4 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-2 text-sm"
             >
               <History className="w-4 h-4" />
-              과거 기록
+              <span className="hidden sm:inline">과거 기록</span>
             </button>
           </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 md:gap-3">
               <button
                 onClick={goToPreviousWeek}
                 className="p-2 hover:bg-gray-200 rounded-full transition-colors"
               >
                 <ChevronLeft className="w-5 h-5 text-gray-600" />
               </button>
-              <div className="text-lg font-medium text-gray-700">
+              <div className="text-sm md:text-lg font-medium text-gray-700">
                 {getWeekRangeText()}
               </div>
               <button
@@ -231,7 +256,7 @@ export function WeeklyCalendar() {
             </div>
             <button
               onClick={goToThisWeek}
-              className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+              className="px-3 py-2 md:px-4 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm"
             >
               이번 주
             </button>
@@ -252,20 +277,21 @@ export function WeeklyCalendar() {
         <WeeklyStats weekTasks={currentWeekTasks} streak={streak} />
 
         {/* 캘린더 그리드 */}
-        <div className="grid grid-cols-7 gap-4 mb-6" style={{ minHeight: "600px" }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3 md:gap-4 mb-6">
           {weekDates.map((date) => {
             const dateKey = formatDateKey(date);
             const tasks = weekData[dateKey] || [];
             return (
-              <DayCard
-                key={dateKey}
-                date={date}
-                tasks={tasks}
-                onTaskToggle={(taskId) => handleTaskToggle(date, taskId)}
-                onTaskAdd={(text, category) => handleTaskAdd(date, text, category)}
-                onTaskDelete={(taskId) => handleTaskDelete(date, taskId)}
-                isToday={isToday(date)}
-              />
+              <div key={dateKey} className="min-h-[400px] lg:min-h-[600px]">
+                <DayCard
+                  date={date}
+                  tasks={tasks}
+                  onTaskToggle={(taskId) => handleTaskToggle(date, taskId)}
+                  onTaskAdd={(text, category) => handleTaskAdd(date, text, category)}
+                  onTaskDelete={(taskId) => handleTaskDelete(date, taskId)}
+                  isToday={isToday(date)}
+                />
+              </div>
             );
           })}
         </div>

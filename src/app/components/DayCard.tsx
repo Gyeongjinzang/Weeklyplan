@@ -103,7 +103,9 @@ export function DayCard({
               >
                 {task.text}
               </span>
-              <CategoryBadge category={task.category} />
+              <div className="flex-shrink-0">
+                <CategoryBadge category={task.category} />
+              </div>
               <button
                 onClick={() => onTaskDelete(task.id)}
                 className="opacity-0 group-hover:opacity-100 transition-opacity"

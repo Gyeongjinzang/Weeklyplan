@@ -37,7 +37,7 @@ export function WeeklyStats({ weekTasks, streak }: WeeklyStatsProps) {
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-      <div className="flex items-start justify-between mb-6">
+      <div className="flex items-start justify-between mb-6 flex-wrap gap-4">
         <div>
           <h2 className="text-2xl font-bold text-gray-800 mb-1">주간 통계</h2>
           <p className="text-gray-600">
@@ -56,12 +56,12 @@ export function WeeklyStats({ weekTasks, streak }: WeeklyStatsProps) {
       </div>
 
       {/* 가장 부진한 카테고리 */}
-      {lowestCategory && (
+      {lowestCategory && lowestCategory.achievement < 100 && (
         <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
           <div className="flex items-start gap-3">
             <TrendingDown className="w-6 h-6 text-red-600 mt-1 flex-shrink-0" />
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
                 <span className="text-lg font-semibold text-gray-800">
                   가장 성취하지 못한 카테고리
                 </span>
